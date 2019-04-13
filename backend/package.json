@@ -1,0 +1,16 @@
+{
+  "name": "ws",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "aws-sdk": "^2.395.0",
+    "dataloader": "^1.4.0",
+    "lodash": "^4.17.11"
+  },
+  "devDependencies": {
+    "serverless": "^1.36.3",
+    "serverless-websockets-plugin": "^1.0.0",
+    "wscat": "^2.2.1"
+  }
+}

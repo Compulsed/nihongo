@@ -1,0 +1,49 @@
+{
+    "event": {
+        "requestContext": {
+            "routeKey": "$default",
+            "authorizer": "",
+            "messageId": "Ud8zMD4D3vcAAAQ=",
+            "integrationLatency": "",
+            "eventType": "MESSAGE",
+            "error": "",
+            "extendedRequestId": "Ud8zMGbWIAMF1wQ=",
+            "requestTime": "02/Feb/2019:10:45:53 +0000",
+            "messageDirection": "IN",
+            "stage": "dev",
+            "connectedAt": 1549104301640,
+            "requestTimeEpoch": 1549104353270,
+            "identity": {
+                "cognitoIdentityPoolId": null,
+                "accountId": null,
+                "cognitoIdentityId": null,
+                "caller": null,
+                "sourceIp": "49.177.188.15",
+                "accessKey": null,
+                "cognitoAuthenticationType": null,
+                "cognitoAuthenticationProvider": null,
+                "userArn": null,
+                "userAgent": null,
+                "user": null
+            },
+            "requestId": "Ud8zMGbWIAMF1wQ=",
+            "domainName": "0xmlxurd45.execute-api.us-east-1.amazonaws.com",
+            "connectionId": "Ud8rIf2L0kwCLMA=",
+            "apiId": "0xmlxurd45",
+            "status": ""
+        },
+        "body": "hello world!",
+        "isBase64Encoded": false
+    },
+    "context": {
+        "callbackWaitsForEmptyEventLoop": true,
+        "logGroupName": "/aws/lambda/websocket-chat-dev-socketHandler",
+        "logStreamName": "2019/02/02/[2]b3e8d2cd85a641d7b9bca6d59c947f8f",
+        "functionName": "websocket-chat-dev-socketHandler",
+        "memoryLimitInMB": "1024",
+        "functionVersion": "2",
+        "invokeid": "cf05616f-7cca-4548-abe0-2488dea9b2f3",
+        "awsRequestId": "cf05616f-7cca-4548-abe0-2488dea9b2f3",
+        "invokedFunctionArn": "arn:aws:lambda:us-east-1:145722906259:function:websocket-chat-dev-socketHandler:2"
+    }
+}

@@ -1,0 +1,55 @@
+service:
+  name: websocket-chat
+
+provider:
+  name: aws
+  runtime: nodejs8.10
+  stackName: ${self:service}-${self:provider.stage}
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region, 'us-east-1'}
+  iamRoleStatements:
+    - Effect: Allow
+      Action: "*"
+      Resource: "*"
+  environment:
+    API_REGION: "${self:provider.region}"
+    SECRET_ARN: ${env:SECRET_ARN}
+    DB_ARN: ${env:DB_ARN}
+    DATABASE_NAME: ${env:DATABASE_NAME}
+
+    # Specifc to Websocket
+  websocketApiName: websocket-chat-${self:provider.stage}
+  websocketApiRouteSelectionExpression: $request.body.action
+
+plugins:
+  - serverless-websockets-plugin
+
+functions:
+  socketHandler:
+    handler: src/handler.handler
+    timeout: 300
+    events:
+      - websocket:
+          routeKey: $connect
+      - websocket:
+          routeKey: $disconnect
+      - websocket:
+          routeKey: sendMessage
+      - websocket:
+          routeKey: $default
+
+resources:
+  Resources:
+    RDSCluster:
+      Type: AWS::RDS::DBCluster
+      Properties:
+        MasterUsername: MasterUsername
+        MasterUserPassword: MasterUserPassword
+        DatabaseName: RANDOMNAME
+        Engine: aurora
+        EngineMode: serverless
+        ScalingConfiguration:
+          AutoPause: true
+          MaxCapacity: 16
+          MinCapacity: 2
+          SecondsUntilAutoPause: 300

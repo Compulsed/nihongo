@@ -30,14 +30,9 @@ const sqlBatcher = new Dataloader(
     { cacheKeyFn: () => Math.random() } // Do not cache any queries / mutations
 );
 
-const sqlMessager = (client) => {
+const sqlMessager = () => {
     return async (sqlString) => {
-        const postMessage = client(`Excuting -> ${sqlString}`);
-
-        const runSQL = sqlBatcher.load(sqlString);
-
-        return Promise.all([ postMessage, runSQL ])
-            .then(() => runSQL);
+        return sqlBatcher.load(sqlString);
     };
 };
 

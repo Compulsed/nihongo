@@ -4,9 +4,22 @@ const { sqlMessager } = require('../sql-messager');
 
 const sql = sqlMessager();
 
+// TODO: Note SQL Injection
 const wordList = async () => {
-    return (await sql(`SELECT * FROM japaneseToEnglishWords;`))
-        .map(row => Object.assign({}, row, { japaneseWord: decodeURI(row.japaneseWord) }));
+    await sql(`
+        SELECT
+            *
+        from
+            japaneseToEnglishWords
+        INNER JOIN
+            japaneseToEnglishWords_tags
+        ON japaneseToEnglishWords.id = japaneseToEnglishWords_tags.japaneseToEnglishWordsId
+        INNER JOIN
+            tags
+        ON japaneseToEnglishWords_tags.tagsId = tags.id
+        WHERE tags.id = 1
+    `)
+    .map(row => Object.assign({}, row, { japaneseWord: decodeURI(row.japaneseWord) }));
 };
 
 // TODO: Note SQL Injection

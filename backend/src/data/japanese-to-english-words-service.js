@@ -1,3 +1,5 @@
+const fs = require('fs');
+
 const { sqlMessager } = require('../sql-messager');
 
 const sql = sqlMessager();
@@ -7,6 +9,7 @@ const wordList = async () => {
         .map(row => Object.assign({}, row, { japaneseWord: decodeURI(row.japaneseWord) }));
 };
 
+// TODO: Note SQL Injection
 const writeWord = async (args) => {
     const englishWord = args.englishWord;
     const japaneseWord = encodeURI(args.japaneseWord);
@@ -22,8 +25,13 @@ const clearWordList = async () => {
     return await sql(`DELETE FROM japaneseToEnglishWords;`);
 };
 
+const seedDatabase = async () => {
+    return await sql(fs.readFileSync('./sql/initial.sql').toString());
+};
+
 module.exports = {
     wordList,
     writeWord,
     clearWordList,
+    seedDatabase,
 };

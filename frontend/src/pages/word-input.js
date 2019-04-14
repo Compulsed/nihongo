@@ -13,6 +13,7 @@ class WordInputForm extends React.Component {
     this.state = {
       postingWord: false,
       postingClearWordList: false,
+      postingSeedDatabase: false,
     };
   }
 
@@ -64,6 +65,28 @@ class WordInputForm extends React.Component {
       });
   }
 
+  seedDatabase() {
+    this.setState({ postingSeedDatabase: true });
+
+    return fetch('http://localhost:3000/graphql', {
+        method: 'POST',
+        body: JSON.stringify({
+          query: `
+            mutation {
+              seedDatabase
+            }
+          `,
+          variables: null,
+        }),
+      })
+      .catch(() => {})
+      .then(() => {
+        this.setState({ postingSeedDatabase: false });
+      });
+  }
+
+
+
   handleSubmit = (e) => {
     e.preventDefault();
     this.props.form.validateFields((err, values) => {
@@ -78,7 +101,7 @@ class WordInputForm extends React.Component {
       getFieldDecorator, getFieldsError, getFieldError, isFieldTouched,
     } = this.props.form;
 
-    const { postingWord, postingClearWordList } = this.state;
+    const { postingWord, postingClearWordList, postingSeedDatabase } = this.state;
 
     // Only show error after a field is touched.
     const userNameError = isFieldTouched('userName') && getFieldError('userName');
@@ -124,7 +147,10 @@ class WordInputForm extends React.Component {
           <h1 style={{ fontSize: 50 }}>Options</h1>
           <Button type="primary" onClick={() => this.clearWordList()}>
             { postingClearWordList ? 'Deleting...' : 'Delete Word List' }
-          </Button>          
+          </Button>
+          <Button style={{marginLeft: 20}} type="primary" onClick={() => this.seedDatabase()}>
+            { postingSeedDatabase ? 'Seeding...' : 'Seed Database' }
+          </Button>
         </div>
       </div>
 

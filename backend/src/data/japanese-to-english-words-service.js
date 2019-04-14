@@ -7,8 +7,6 @@ const sql = sqlMessager();
 
 const knex = require('knex')({client: 'mysql'})
 
-
-
 // TODO: Note SQL Injection
 const wordList = async (args) => {
     queryString = knex('japaneseToEnglishWords')
@@ -21,7 +19,7 @@ const wordList = async (args) => {
             .innerJoin('japaneseToEnglishWords_tags', 'tags.id', 'japaneseToEnglishWords_tags.tagsId')
             .innerJoin('japaneseToEnglishWords', 'japaneseToEnglishWordsId', 'japaneseToEnglishWords.id')
             .whereIn('tags.id', args.tagIds)
-            .toString()
+            .toString();
     }
 
     return (await sql(queryString))

@@ -2,7 +2,11 @@ import * as d3 from 'd3';
 import * as $ from 'jquery';
 
 /*eslint-disable no-undef*/
-export const drawTreeData = treeData => {  
+export const drawTreeData = treeData => {
+    var dragStarted;
+    var domNode;
+    var nodes;
+
     // Calculate total nodes, max label length
     var totalNodes = 0;
     var maxLabelLength = 0;
@@ -179,14 +183,14 @@ export const drawTreeData = treeData => {
       .call(zoomListener);
   
     // Define the drag listeners for drag/drop behaviour of nodes.
-    dragListener = d3.behavior
+    var dragListener = d3.behavior
       .drag()
       .on("dragstart", function(d) {
         if (d == root) {
           return;
         }
         dragStarted = true;
-        nodes = tree.nodes(d);
+        var nodes = tree.nodes(d);
         d3.event.sourceEvent.stopPropagation();
         // it's important that we suppress the mouseover event on the node being dragged. Otherwise it will absorb the mouseover event and the underlying node will not detect it d3.select(this).attr('pointer-events', 'none');
       })
@@ -229,7 +233,7 @@ export const drawTreeData = treeData => {
         if (d == root) {
           return;
         }
-        domNode = this;
+        var domNode = this;
         if (selectedNode) {
           // now remove the element from the parent, and insert it into the new elements children
           var index = draggingNode.parent.children.indexOf(draggingNode);
@@ -334,11 +338,11 @@ export const drawTreeData = treeData => {
     // Function to center node when clicked/dropped so node doesn't get lost when collapsing/moving with large amount of children.
   
     function centerNode(source) {
-      scale = zoomListener.scale();
-      x = -source.y0;
-      y = -source.x0;
-      x = x * scale + viewerWidth / 2;
-      y = y * scale + viewerHeight / 2;
+      var scale = zoomListener.scale();
+      var x = -source.y0;
+      var y = -source.x0;
+      var x = x * scale + viewerWidth / 2;
+      var y = y * scale + viewerHeight / 2;
       d3
         .select("g")
         .transition()
@@ -401,7 +405,7 @@ export const drawTreeData = treeData => {
       });
   
       // Update the nodes…
-      node = svgGroup.selectAll("g.node").data(nodes, function(d) {
+      var node = svgGroup.selectAll("g.node").data(nodes, function(d) {
         return d.id || (d.id = ++i);
       });
   

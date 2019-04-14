@@ -17,26 +17,31 @@ const fetchWordTree = () => {
     })
   })
   .then(treeData => treeData.json())
-  .then(result => JSON.parse(result.data.wordTree));
+  .then(result => JSON.parse(result.data.wordTree))
+  .then(treeData => drawTreeData('#tree-container', treeData));
 }
 
 const style = {
-  width: '1000px',
-  height: '1000px',
+  width: '500px',
+  height: '500px',
 };
 
 class App extends Component {
   componentDidMount() {
-    fetchWordTree()
-      .then(treeData => drawTreeData('#tree-container', treeData));
+    fetchWordTree();
   }
 
+  refetchTree() {
+    fetchWordTree();
+  }
 
   render() {
     return (
       <div className="App">
-        <Button type="primary">Button</Button>
         <div style={style} id="tree-container"></div>
+        <Button type="primary" onClick={fetchWordTree}>
+          Button
+        </Button>
       </div>
     );
   }

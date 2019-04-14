@@ -5,20 +5,23 @@ const { sqlMessager } = require('../sql-messager');
 
 const sql = sqlMessager();
 
+const knex = require('knex')({client: 'mysql'})
+
+
+
 // TODO: Note SQL Injection
 const wordList = async (args) => {
-    let queryString = `SELECT * from japaneseToEnglishWords`;
+    queryString = knex('japaneseToEnglishWords')
+        .innerJoin('japaneseToEnglishWords_tags', 'japaneseToEnglishWords.id', 'japaneseToEnglishWords_tags.japaneseToEnglishWordsId')
+        .innerJoin('tags','tags.id', 'japaneseToEnglishWords_tags.tagsId')
+        .toString();
 
     if (args.tagIds && args.tagIds.length >= 1) {
-        queryString = SqlString.format(`
-            SELECT *
-            from        tags
-            INNER JOIN  japaneseToEnglishWords_tags
-            ON          tags.id = japaneseToEnglishWords_tags.tagsId
-            INNER JOIN  japaneseToEnglishWords
-            ON          japaneseToEnglishWords_tags.japaneseToEnglishWordsId = japaneseToEnglishWords.id
-            WHERE       tags.id = ?
-        `, [args.tagIds[0]]);
+        queryString = knex('tags')
+            .innerJoin('japaneseToEnglishWords_tags', 'tags.id', 'japaneseToEnglishWords_tags.tagsId')
+            .innerJoin('japaneseToEnglishWords', 'japaneseToEnglishWordsId', 'japaneseToEnglishWords.id')
+            .whereIn('tags.id', args.tagIds)
+            .toString()
     }
 
     return (await sql(queryString))

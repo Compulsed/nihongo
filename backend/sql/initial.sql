@@ -45,8 +45,10 @@ CREATE TABLE IF NOT EXISTS japaneseToEnglishWords_tags (
 ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 INSERT INTO japaneseToEnglishWords_tags (japaneseToEnglishWordsId, tagsId) VALUES (1, 1);
-INSERT INTO japaneseToEnglishWords_tags (japaneseToEnglishWordsId, tagsId) VALUES (1, 2);
 INSERT INTO japaneseToEnglishWords_tags (japaneseToEnglishWordsId, tagsId) VALUES (2, 1);
+INSERT INTO japaneseToEnglishWords_tags (japaneseToEnglishWordsId, tagsId) VALUES (3, 2);
+INSERT INTO japaneseToEnglishWords_tags (japaneseToEnglishWordsId, tagsId) VALUES (4, 3);
+INSERT INTO japaneseToEnglishWords_tags (japaneseToEnglishWordsId, tagsId) VALUES (5, 3);
 
 -- SELECT * from japaneseToEnglishWords;
 SELECT

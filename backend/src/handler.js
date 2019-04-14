@@ -19,9 +19,9 @@ const typeDefs = gql`
     }
 
     type Query {
-        wordList(tagIds: [String]): [WordPair]
-        wordListJSON(tagIds: [String]): String
-        wordTree(tagIds: [String]): String
+        wordList(tagIds: [Int]): [WordPair]
+        wordListJSON(tagIds: [Int]): String
+        wordTree(tagIds: [Int]): String
         tagList: [TagList]
     }
 

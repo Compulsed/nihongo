@@ -13,7 +13,7 @@ export class Home extends Component {
             body: JSON.stringify({
                 query: `
                     query {
-                        wordTree(tagIds: ["1"])
+                        wordTree(tagIds: [0, 1, 2])
                     }
             `,
                 variables: null,

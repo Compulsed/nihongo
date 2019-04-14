@@ -14,12 +14,14 @@ class WordInputForm extends React.Component {
       postingWord: false,
       postingClearWordList: false,
       postingSeedDatabase: false,
+      wordListJSON: null,
     };
   }
 
   componentDidMount() {
     // To disabled submit button at the beginning.
     this.props.form.validateFields();
+    this.getWordListJSON();
   }
 
   addWord(japaneseWord, englishWord) {
@@ -65,6 +67,24 @@ class WordInputForm extends React.Component {
       });
   }
 
+  getWordListJSON() {
+    fetch('http://localhost:3000/graphql', {
+        method: 'POST',
+        body: JSON.stringify({
+          query: `
+            query {
+              wordListJSON
+            }
+          `,
+          variables: null,
+        }),
+      })
+      .then(wordList => wordList.json())
+      .then(result => this.setState({ wordListJSON: result.data.wordListJSON }))
+      .catch(() => {});
+  }
+
+
   seedDatabase() {
     this.setState({ postingSeedDatabase: true });
 
@@ -101,7 +121,7 @@ class WordInputForm extends React.Component {
       getFieldDecorator, getFieldsError, getFieldError, isFieldTouched,
     } = this.props.form;
 
-    const { postingWord, postingClearWordList, postingSeedDatabase } = this.state;
+    const { postingWord, postingClearWordList, postingSeedDatabase, wordListJSON } = this.state;
 
     // Only show error after a field is touched.
     const userNameError = isFieldTouched('userName') && getFieldError('userName');
@@ -152,6 +172,10 @@ class WordInputForm extends React.Component {
             { postingSeedDatabase ? 'Seeding...' : 'Seed Database' }
           </Button>
         </div>
+
+        <div style={{ marginTop: 20 }}>
+          <pre>{ wordListJSON }</pre>
+        </div>        
       </div>
 
     );

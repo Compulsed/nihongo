@@ -17,7 +17,7 @@ function BasicExample() {
   
   return (
     <Router>
-      <Layout style={{ height:"100vh" }}>
+      <Layout style={{ minHeight:"100vh" }}>
         <Header className="header">
           <div className="logo" />
           <Menu
@@ -79,37 +79,6 @@ function BasicExample() {
       </Layout>
     </Router>
   );
-
-  // return (
-  //   <Router>
-  //     <Layout>
-  //       <Layout.Header>header</Layout.Header>
-  //       <Layout>
-  //         <Layout.Sider>
-  //         <div>
-  //           <ul>
-  //             <li>
-  //               <Link to="/">Home</Link>
-  //             </li>
-  //             <li>
-  //               <Link to="/word-input">Word Input</Link>
-  //             </li>
-  //             <li>
-  //               <Link to="/topics">Topics</Link>
-  //             </li>
-  //           </ul>
-  //         </div>
-  //         </Layout.Sider>
-  //         <Layout.Content>
-  //             <Route exact path="/" component={Home} />
-  //             <Route path="/word-input" component={WordInput} />
-  //             <Route path="/topics" component={Topics} />
-  //         </Layout.Content>
-  //       </Layout>
-  //       <Layout.Footer>footer</Layout.Footer>
-  //     </Layout>
-  //   </Router>
-  // );
 }
 
 

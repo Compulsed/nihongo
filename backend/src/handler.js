@@ -20,6 +20,7 @@ const typeDefs = gql`
 
     type Query {
         wordList(tagIds: [String]): [WordPair]
+        wordListJSON(tagIds: [String]): String
         wordTree(tagIds: [String]): String
         tagList: [TagList]
     }
@@ -35,6 +36,9 @@ const resolvers = {
     Query: {
         wordList: async (parent, args) => {
             return wordList(args);
+        },
+        wordListJSON: async (parent, args) => {
+            return JSON.stringify(await wordList(args), null, 2);
         },
         wordTree: async (parent, args) => {
             return JSON.stringify(convertToTreeForm(await wordList(args)));

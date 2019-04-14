@@ -6,20 +6,20 @@ const { sqlMessager } = require('../sql-messager');
 const sql = sqlMessager();
 
 // TODO: Note SQL Injection
-const wordList = async () => {
-    const queryString = SqlString.format(`
-        SELECT *
-        from
-            japaneseToEnglishWords
-        INNER JOIN
-            japaneseToEnglishWords_tags
-        ON
-            japaneseToEnglishWords.id = japaneseToEnglishWords_tags.japaneseToEnglishWordsId
-        INNER JOIN tags
-        ON
-            japaneseToEnglishWords_tags.tagsId = tags.id
-        WHERE tags.id = ?
-    `, [1]);
+const wordList = async (args) => {
+    let queryString = `SELECT * from japaneseToEnglishWords`;
+
+    if (args.tagIds && args.tagIds.length >= 1) {
+        queryString = SqlString.format(`
+            SELECT *
+            from        tags
+            INNER JOIN  japaneseToEnglishWords_tags
+            ON          tags.id = japaneseToEnglishWords_tags.tagsId
+            INNER JOIN  japaneseToEnglishWords
+            ON          japaneseToEnglishWords_tags.japaneseToEnglishWordsId = japaneseToEnglishWords.id
+            WHERE       tags.id = ?
+        `, [args.tagIds[0]]);
+    }
 
     return (await sql(queryString))
         .map(row => Object.assign({}, row, { japaneseWord: decodeURI(row.japaneseWord) }));

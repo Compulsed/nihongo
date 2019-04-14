@@ -2,8 +2,7 @@ import React, { Component } from 'react';
 import Button from 'antd/lib/button';
 import './App.css';
 
-import { drawTreeData } from '../../frontend/src/libs/DrawTree';
-
+import { drawTreeData } from './libs/DrawTree';
 
 const fetchWordTree = () => {
   return fetch('http://localhost:3000/graphql', {
@@ -32,11 +31,12 @@ class App extends Component {
       .then(treeData => drawTreeData('#tree-container', treeData));
   }
 
+
   render() {
     return (
       <div className="App">
-          {/* <div style={style} id="tree-container"></div> */}
-          {/* <Button type="primary">Button</Button> */}
+        <Button type="primary">Button</Button>
+        <div style={style} id="tree-container"></div>
       </div>
     );
   }

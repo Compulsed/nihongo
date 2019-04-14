@@ -9,6 +9,8 @@ export const drawTreeData = (elementId, treeData) => {
     var links;
     var parentLink;
     var nodePaths;
+    var relCoords;
+    var nodesExit;
 
     // Calculate total nodes, max label length
     var totalNodes = 0;

@@ -1,50 +1,46 @@
 import React, { Component } from 'react';
-import Button from 'antd/lib/button';
+import { BrowserRouter as Router, Route, Link } from "react-router-dom";
+import { Layout } from 'antd';
+
 import './App.css';
 
-import { drawTreeData } from './libs/DrawTree';
+import { WordInput } from './pages/word-input';
+import { Home } from './pages/home';
+import { Topics } from './pages/topics';
 
-const fetchWordTree = () => {
-  return fetch('http://localhost:3000/graphql', {
-    method: 'POST',
-    body: JSON.stringify({
-      query: `
-        query {
-          wordTree
-        }
-      `,
-      variables: null,
-    })
-  })
-  .then(treeData => treeData.json())
-  .then(result => JSON.parse(result.data.wordTree))
-  .then(treeData => drawTreeData('#tree-container', treeData));
+function BasicExample() {
+  return (
+    <Router>
+      <Layout>
+        <Layout.Header>header</Layout.Header>
+        <Layout>
+          <Layout.Sider>
+          <div>
+            <ul>
+              <li>
+                <Link to="/">Home</Link>
+              </li>
+              <li>
+                <Link to="/word-input">Word Input</Link>
+              </li>
+              <li>
+                <Link to="/topics">Topics</Link>
+              </li>
+            </ul>
+          </div>
+          </Layout.Sider>
+          <Layout.Content>
+              <Route exact path="/" component={Home} />
+              <Route path="/word-input" component={WordInput} />
+              <Route path="/topics" component={Topics} />
+          </Layout.Content>
+        </Layout>
+        <Layout.Footer>footer</Layout.Footer>
+      </Layout>
+    </Router>
+  );
 }
 
-const style = {
-  width: '500px',
-  height: '500px',
-};
 
-class App extends Component {
-  componentDidMount() {
-    fetchWordTree();
-  }
 
-  refetchTree() {
-    fetchWordTree();
-  }
-
-  render() {
-    return (
-      <div className="App">
-        <div style={style} id="tree-container"></div>
-        <Button type="primary" onClick={fetchWordTree}>
-          Button
-        </Button>
-      </div>
-    );
-  }
-}
-
-export default App;
+export default BasicExample;

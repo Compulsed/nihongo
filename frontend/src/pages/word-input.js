@@ -12,6 +12,7 @@ class WordInputForm extends React.Component {
 
     this.state = {
       postingWord: false,
+      postingClearWordList: false,
     };
   }
 
@@ -43,6 +44,26 @@ class WordInputForm extends React.Component {
       });
   }
 
+  clearWordList() {
+    this.setState({ postingClearWordList: true });
+
+    return fetch('http://localhost:3000/graphql', {
+        method: 'POST',
+        body: JSON.stringify({
+          query: `
+            mutation {
+              clearWordList
+            }
+          `,
+          variables: null,
+        }),
+      })
+      .catch(() => {})
+      .then(() => {
+        this.setState({ postingClearWordList: false });
+      });
+  }
+
   handleSubmit = (e) => {
     e.preventDefault();
     this.props.form.validateFields((err, values) => {
@@ -57,45 +78,54 @@ class WordInputForm extends React.Component {
       getFieldDecorator, getFieldsError, getFieldError, isFieldTouched,
     } = this.props.form;
 
-    const { postingWord } = this.state;
+    const { postingWord, postingClearWordList } = this.state;
 
     // Only show error after a field is touched.
     const userNameError = isFieldTouched('userName') && getFieldError('userName');
     const passwordError = isFieldTouched('password') && getFieldError('password');
     return (
       <div style={{ margin: 40 }}>
-        <h1 style={{ fontSize: 50 }}>Input New Word</h1>
-        <Form layout="inline" onSubmit={this.handleSubmit}>
-          <Form.Item
-            validateStatus={userNameError ? 'error' : ''}
-            help={userNameError || ''}
-          >
-            {getFieldDecorator('japaneseWord', {
-              rules: [{ required: true, message: 'Please input a Japanese Word' }],
-            })(
-              <Input placeholder="Japanese" />
-            )}
-          </Form.Item>
-          <Form.Item
-            validateStatus={passwordError ? 'error' : ''}
-            help={passwordError || ''}
-          >
-            {getFieldDecorator('englishWord', {
-              rules: [{ required: true, message: 'Please input an English Word' }],
-            })(
-              <Input placeholder="English" />
-            )}
-          </Form.Item>
-          <Form.Item>
-            <Button
-              type="primary"
-              htmlType="submit"
-              disabled={postingWord || hasErrors(getFieldsError())}
+        <div>
+          <h1 style={{ fontSize: 50 }}>Input New Word</h1>
+          <Form layout="inline" onSubmit={this.handleSubmit}>
+            <Form.Item
+              validateStatus={userNameError ? 'error' : ''}
+              help={userNameError || ''}
             >
-              { postingWord ? 'Posting...' : 'Post New Word' }
-            </Button>
-          </Form.Item>
-        </Form>
+              {getFieldDecorator('japaneseWord', {
+                rules: [{ required: true, message: 'Please input a Japanese Word' }],
+              })(
+                <Input placeholder="Japanese" />
+              )}
+            </Form.Item>
+            <Form.Item
+              validateStatus={passwordError ? 'error' : ''}
+              help={passwordError || ''}
+            >
+              {getFieldDecorator('englishWord', {
+                rules: [{ required: true, message: 'Please input an English Word' }],
+              })(
+                <Input placeholder="English" />
+              )}
+            </Form.Item>
+            <Form.Item>
+              <Button
+                type="primary"
+                htmlType="submit"
+                disabled={postingWord || hasErrors(getFieldsError())}
+              >
+                { postingWord ? 'Posting...' : 'Post New Word' }
+              </Button>
+            </Form.Item>
+          </Form>
+        </div>
+
+        <div style={{ marginTop: 20 }}>
+          <h1 style={{ fontSize: 50 }}>Options</h1>
+          <Button type="primary" onClick={() => this.clearWordList()}>
+            { postingClearWordList ? 'Deleting...' : 'Delete Word List' }
+          </Button>          
+        </div>
       </div>
 
     );

@@ -1,5 +1,5 @@
 const { ApolloServer, gql } = require('apollo-server-lambda');
-const { wordList, writeWord } = require('./data/japanese-to-english-words-service');
+const { wordList, writeWord, clearWordList } = require('./data/japanese-to-english-words-service');
 const { convertToTreeForm } = require('./util/convert-word-list-to-tree');
 
 // Construct a schema, using GraphQL schema language
@@ -16,6 +16,7 @@ const typeDefs = gql`
 
     type Mutation {
         writeWord(englishWord: String!, japaneseWord: String!): String
+        clearWordList: String
     }
 `;
 
@@ -32,6 +33,11 @@ const resolvers = {
   Mutation: {
     writeWord: async (parent, args, context) => {
         await writeWord(args);
+
+        return 'Success';
+    },
+    clearWordList: async () => {
+        await clearWordList();
 
         return 'Success';
     },

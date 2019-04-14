@@ -3,9 +3,9 @@ const { sqlMessager } = require('../sql-messager');
 const sql = sqlMessager();
 
 const wordList = async () => {
-    return (await sql(`select * from japaneseToEnglishWords;`))
+    return (await sql(`SELECT * FROM japaneseToEnglishWords;`))
         .map(row => Object.assign({}, row, { japaneseWord: decodeURI(row.japaneseWord) }));
-}
+};
 
 const writeWord = async (args) => {
     const englishWord = args.englishWord;
@@ -16,9 +16,14 @@ const writeWord = async (args) => {
             (japaneseWord, englishWord)
         VALUES ('${japaneseWord}', '${englishWord}')
     `);
-}
+};
+
+const clearWordList = async () => {
+    return await sql(`DELETE FROM japaneseToEnglishWords;`);
+};
 
 module.exports = {
     wordList,
     writeWord,
+    clearWordList,
 };

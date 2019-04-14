@@ -18,18 +18,22 @@ const fetchWordTree = () => {
   .then(result => JSON.parse(result.data.wordTree));
 }
 
+const style = {
+  width: '1000px',
+  height: '1000px',
+};
+
 class App extends Component {
   componentDidMount() {
     fetchWordTree()
-      .then(treeData => drawTreeData(treeData));
+      .then(treeData => drawTreeData('#tree-container', treeData));
   }
 
   render() {
-
     return (
       <div className="App">
         <header className="App-header">
-          <div id="tree-container"></div>
+          <div style={style} id="tree-container"></div>
         </header>
       </div>
     );

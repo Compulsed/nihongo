@@ -2,10 +2,13 @@ import * as d3 from 'd3';
 import * as $ from 'jquery';
 
 /*eslint-disable no-undef*/
-export const drawTreeData = treeData => {
+export const drawTreeData = (elementId, treeData) => {
     var dragStarted;
     var domNode;
     var nodes;
+    var links;
+    var parentLink;
+    var nodePaths;
 
     // Calculate total nodes, max label length
     var totalNodes = 0;
@@ -22,8 +25,8 @@ export const drawTreeData = treeData => {
     var root;
   
     // size of the diagram
-    var viewerWidth = $(document).width();
-    var viewerHeight = $(document).height();
+    var viewerWidth = $(elementId).width();
+    var viewerHeight = $(elementId).height();
   
     var tree = d3.layout.tree().size([viewerHeight, viewerWidth]);
   
@@ -175,7 +178,7 @@ export const drawTreeData = treeData => {
   
     // define the baseSvg, attaching a class for styling and the zoomListener
     var baseSvg = d3
-      .select("#tree-container")
+      .select(elementId)
       .append("svg")
       .attr("width", viewerWidth)
       .attr("height", viewerHeight)
@@ -190,7 +193,7 @@ export const drawTreeData = treeData => {
           return;
         }
         dragStarted = true;
-        var nodes = tree.nodes(d);
+        nodes = tree.nodes(d);
         d3.event.sourceEvent.stopPropagation();
         // it's important that we suppress the mouseover event on the node being dragged. Otherwise it will absorb the mouseover event and the underlying node will not detect it d3.select(this).attr('pointer-events', 'none');
       })

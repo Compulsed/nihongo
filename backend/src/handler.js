@@ -1,17 +1,17 @@
-const { sqlMessager } = require('./sql-messager');
 const { ApolloServer, gql } = require('apollo-server-lambda');
-
-const sql = sqlMessager();
+const { wordList, writeWord } = require('./data/japanese-to-english-words-service');
+const { convertToTreeForm } = require('./util/convert-word-list-to-tree');
 
 // Construct a schema, using GraphQL schema language
 const typeDefs = gql`
-    type wordPair {
+    type WordPair {
         japaneseWord: String
         englishWord: String
     }
 
     type Query {
-        wordList: [wordPair]
+        wordList: [WordPair]
+        wordTree: String
     }
 
     type Mutation {
@@ -19,29 +19,22 @@ const typeDefs = gql`
     }
 `;
 
-// Provide resolver functions for your schema fields
 const resolvers = {
   Query: {
     wordList: async () => {
-        (await sql(`select * from japaneseToEnglishWords;`))
-            .map(row => Object.assign({}, row, { japaneseWord: decodeURI(row.japaneseWord) }));
+        return wordList();
+    },
+    wordTree: async () => {
+        return JSON.stringify(convertToTreeForm(await wordList()));
     }
   },
 
   Mutation: {
     writeWord: async (parent, args, context) => {
-        const englishWord = args.englishWord;
-        const japaneseWord = encodeURI(args.japaneseWord);
-        
-        await sql(`
-            INSERT INTO japaneseToEnglishWords
-                (japaneseWord, englishWord)
-            VALUES ('${japaneseWord}', '${englishWord}')
-        `);
+        await writeWord(args);
 
         return 'Success';
-    }
-        
+    },
   }
 };
 

@@ -1,38 +1,36 @@
-const Dataloader = require('dataloader');
 const AWS = require('aws-sdk');
 const _ = require('lodash');
 
 const { transformSQLQuery } = require('./transform');
 
-const sqlBatcher = new Dataloader(
-    async (sqlStrings) => {
+const sqlMessager = () => {
+    return async (sqlString) => {
         const now = Date.now();
-
-        const sqlStatements = sqlStrings
-            .join(' ');
 
         const result = await (new AWS.RDSDataService()).executeSql({
             awsSecretStoreArn: process.env.SECRET_ARN,
             dbClusterOrInstanceArn: process.env.DB_ARN,
             database: process.env.DATABASE_NAME,
-            sqlStatements: sqlStatements,
+            sqlStatements: sqlString,
         })
         .promise();
 
-        console.log(`Time taken to run query: ${sqlStatements}`);
-        console.log(`${Date.now() - now}ms.`)
+        // Output
+        console.log(`Result: ${JSON.stringify(result, null, 2)}`);
 
-        return _.map(
+        // Performance
+        console.log(`Time taken to run query: ${sqlString}`);
+        console.log(`${Date.now() - now}ms.`)
+        
+        const mappedResult = _.map(
             result.sqlStatementResults,
             sqlStatementResult => transformSQLQuery(sqlStatementResult)
         );
-    },
-    { cacheKeyFn: () => Math.random() } // Do not cache any queries / mutations
-);
 
-const sqlMessager = () => {
-    return async (sqlString) => {
-        return sqlBatcher.load(sqlString);
+        // Output
+        console.log(`MappedResult: ${JSON.stringify(mappedResult, null, 2)}`);
+
+        return mappedResult[mappedResult.length - 1];
     };
 };
 

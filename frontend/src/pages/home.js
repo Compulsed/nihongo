@@ -3,7 +3,7 @@ import { drawTreeData } from '../libs/DrawTree';
 
 const style = {
     width: '100%',
-    height: '800px',
+    height: '600px',
 };
 
 export class Home extends Component {
@@ -19,9 +19,9 @@ export class Home extends Component {
                 variables: null,
             })
         })
-            .then(treeData => treeData.json())
-            .then(result => JSON.parse(result.data.wordTree))
-            .then(treeData => drawTreeData('#tree-container', treeData));
+        .then(treeData => treeData.json())
+        .then(result => JSON.parse(result.data.wordTree))
+        .then(treeData => drawTreeData('#tree-container', treeData));
     }
 
     render() {

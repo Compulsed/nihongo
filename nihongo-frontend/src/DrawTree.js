@@ -1,7 +1,8 @@
 import * as d3 from 'd3';
 import * as $ from 'jquery';
 
-export const drawTreeData = treeData => {
+/*eslint-disable no-undef*/
+export const drawTreeData = treeData => {  
     // Calculate total nodes, max label length
     var totalNodes = 0;
     var maxLabelLength = 0;

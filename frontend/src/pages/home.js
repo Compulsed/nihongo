@@ -1,7 +1,10 @@
 import React, { Component } from 'react';
 import { drawTreeData } from '../libs/DrawTree';
-
+import { gql } from 'apollo-boost';
+import { Query } from 'react-apollo';
 import { Select } from 'antd';
+
+import { client } from '../services/apollo-client';
 
 const Option = Select.Option;
 
@@ -11,58 +14,37 @@ const style = {
     marginTop: '20px'
 };
 
-export class Home extends Component {
-    constructor(...args) {
-        super(...args);
-
-        this.state = {
-            tagList: null
-        };
+const TAGS = gql`
+    query {
+        tagList {
+            id
+            tagName
+        }
     }
+`;
 
+const WORD_TREE = gql`
+    query ($tagIds: [Int]) {
+        wordTree(tagIds: $tagIds)
+    }
+`;
+
+export class Home extends Component {
     fetchDrawTree(tagIds) {
         if (document.getElementById('tree-container')) {
             document.getElementById('tree-container').innerHTML = ''
         }
 
-        return fetch('http://localhost:3000/graphql', {
-            method: 'POST',
-            body: JSON.stringify({
-                query: `
-                    query ($tagIds: [Int]) {
-                        wordTree(tagIds: $tagIds)
-                    }
-                `,
-                variables: { tagIds: tagIds },
-            })
+        client.query({
+            query: WORD_TREE,
+            variables: { tagIds: tagIds }
         })
-        .then(treeData => treeData.json())
-        .then(result => JSON.parse(result.data.wordTree))
+        .then(data => JSON.parse(data.data.wordTree))
         .then(treeData => drawTreeData('#tree-container', treeData));
-    }
-
-    fetchTags() {
-        return fetch('http://localhost:3000/graphql', {
-            method: 'POST',
-            body: JSON.stringify({
-                query: `
-                    query {
-                        tagList {
-                            id
-                            tagName
-                        }
-                    }
-            `,
-                variables: null,
-            })
-        })
-        .then(treeData => treeData.json())
-        .then(result => this.setState({ tagList: result.data.tagList }));
     }
 
     componentDidMount() {
         this.fetchDrawTree();
-        this.fetchTags()
     }
 
     onChange(tagValues) {       
@@ -70,23 +52,27 @@ export class Home extends Component {
     }
 
     render() {
-        const { tagList } = this.state;
-
         return (
-            <div>
-                <h1 style={{ fontSize: 50 }}>Language Tree</h1>
-                <Select
-                    mode='multiple'
-                    style={{ width: '100%' }}
-                    placeholder="Please select"
-                    onChange={(...args) => this.onChange(...args)}
-                >
-                    { (tagList || []).map(tagItem => 
-                        <Option key={tagItem.id}>{tagItem.tagName}</Option>
-                    )}                   
-                </Select>
-                <div style={style} id="tree-container"></div>
-            </div>
+            <Query query={TAGS}>
+                {({ loading, error, data }) => {
+                return (
+                    <div>
+                        <h1 style={{ fontSize: 50 }}>Language Tree</h1>
+                        <Select
+                            mode='multiple'
+                            style={{ width: '100%' }}
+                            placeholder="Please select"
+                            onChange={(...args) => this.onChange(...args)}
+                        >
+                            { (data.tagList || []).map(tagItem => 
+                                <Option key={tagItem.id}>{tagItem.tagName}</Option>
+                            )}                   
+                        </Select>
+                        <div style={style} id="tree-container"></div>
+                    </div>
+                );
+            }}
+            </Query>
         );
     }
 }

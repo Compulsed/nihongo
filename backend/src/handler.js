@@ -6,6 +6,8 @@ const { sqlMessager } = require('./sql-messager');
 
 const sql = sqlMessager();
 
+const knex = require('knex')({client: 'mysql'})
+
 // Construct a schema, using GraphQL schema language
 const typeDefs = gql`
     type WordPair {
@@ -26,7 +28,8 @@ const typeDefs = gql`
     }
 
     type Mutation {
-        writeWord(englishWord: String!, japaneseWord: String!): String
+        writeWord(englishWord: String!, japaneseWord: String!, tags: [Int]): String
+        createTag(tagName: String!): String
         clearWordList: String
         seedDatabase: String
     }
@@ -51,6 +54,15 @@ const resolvers = {
     Mutation: {
         writeWord: async (parent, args, context) => {
             await writeWord(args);
+
+            return 'Success';
+        },
+        createTag: async (parent, { tagName }, context) => {
+            const insertString = knex('tags')
+                .insert({ tagName })
+                .toString();
+
+            await sql(insertString);
 
             return 'Success';
         },

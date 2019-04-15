@@ -30,13 +30,24 @@ const wordList = async (args) => {
 const writeWord = async (args) => {
     const englishWord = args.englishWord;
     const japaneseWord = encodeURI(args.japaneseWord);
+    const tags = args.tags;
     
-    const writeString = SqlString.format(
-        `INSERT INTO japaneseToEnglishWords (japaneseWord, englishWord) VALUES (?, ?)`,
-        [japaneseWord, englishWord]
+    const writeStringWords = SqlString.format(
+        `
+            START TRANSACTION;
+
+            INSERT INTO japaneseToEnglishWords (japaneseWord, englishWord)
+            VALUES (?, ?);
+            
+            INSERT INTO japaneseToEnglishWords_tags (japaneseToEnglishWordsId, tagsId)
+            VALUES (LAST_INSERT_ID(), ?);
+
+            COMMIT;
+        `,
+        [japaneseWord, englishWord, tags[0]]
     );
     
-    await sql(writeString);
+    await sql(writeStringWords);
 };
 
 const clearWordList = async () => {

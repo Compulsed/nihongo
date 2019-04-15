@@ -54,7 +54,7 @@ export class Home extends Component {
     render() {
         return (
             <Query query={TAGS}>
-                {({ loading, error, data }) => {
+                {({ data }) => {
                 return (
                     <div>
                         <h1 style={{ fontSize: 50 }}>Language Tree</h1>

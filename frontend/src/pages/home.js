@@ -21,6 +21,10 @@ export class Home extends Component {
     }
 
     fetchDrawTree(tagIds) {
+        if (document.getElementById('tree-container')) {
+            document.getElementById('tree-container').innerHTML = ''
+        }
+
         return fetch('http://localhost:3000/graphql', {
             method: 'POST',
             body: JSON.stringify({
@@ -61,9 +65,8 @@ export class Home extends Component {
         this.fetchTags()
     }
 
-    onChange(tagValues) {
-        debugger;
-        this.fetchDrawTree();
+    onChange(tagValues) {       
+        this.fetchDrawTree(tagValues.map(string => parseInt(string, 10)));
     }
 
     render() {
@@ -73,7 +76,7 @@ export class Home extends Component {
             <div>
                 <h1 style={{ fontSize: 50 }}>Language Tree</h1>
                 <Select
-                    mode="multiple"
+                    mode='multiple'
                     style={{ width: '100%' }}
                     placeholder="Please select"
                     onChange={(...args) => this.onChange(...args)}

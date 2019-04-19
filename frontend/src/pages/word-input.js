@@ -1,6 +1,6 @@
 import React from 'react';
 import { gql } from 'apollo-boost';
-import { Query } from 'react-apollo';
+import { Query, Mutation } from 'react-apollo';
 import { Form, Input, Button } from 'antd';
 import { Select } from 'antd';
 
@@ -18,6 +18,23 @@ const TAGS = gql`
         }
     }
 `;
+
+const SEED_DATABASE = gql`
+  mutation {
+    seedDatabase
+  }
+`;
+
+const CLEAR_WORDLIST = gql`
+  mutation {
+    clearWordList
+  }
+`;
+
+const WRITE_WORD = gql`
+  mutation($englishWord: String!, $japaneseWord: String!, $tags: [Int]) {
+    writeWord(englishWord: $englishWord, japaneseWord: $japaneseWord, tags: $tags)
+}`;
 
 class WordInputForm extends React.Component {
   constructor(props) {
@@ -58,50 +75,6 @@ class WordInputForm extends React.Component {
       });
   }
 
-  addWord(japaneseWord, englishWord, selectedTags) {
-    this.setState({ postingWord: true });
-
-    return fetch('http://localhost:3000/graphql', {
-        method: 'POST',
-        body: JSON.stringify({
-          query: `
-            mutation($englishWord: String!, $japaneseWord: String!, $tags: [Int]) {
-              writeWord(englishWord: $englishWord, japaneseWord: $japaneseWord, tags: $tags)
-            }
-          `,
-          variables: {
-            englishWord,
-            japaneseWord,
-            tags: selectedTags,
-          },
-        }),
-      })
-      .catch(() => {})
-      .then(() => {
-        this.setState({ postingWord: false });
-      });
-  }
-
-  clearWordList() {
-    this.setState({ postingClearWordList: true });
-
-    return fetch('http://localhost:3000/graphql', {
-        method: 'POST',
-        body: JSON.stringify({
-          query: `
-            mutation {
-              clearWordList
-            }
-          `,
-          variables: null,
-        }),
-      })
-      .catch(() => {})
-      .then(() => {
-        this.setState({ postingClearWordList: false });
-      });
-  }
-
   getWordListJSON() {
     fetch('http://localhost:3000/graphql', {
         method: 'POST',
@@ -119,38 +92,27 @@ class WordInputForm extends React.Component {
       .catch(() => {});
   }
 
+  handleTagChange(values) {
+    debugger;
 
-  seedDatabase() {
-    this.setState({ postingSeedDatabase: true });
-
-    return fetch('http://localhost:3000/graphql', {
-        method: 'POST',
-        body: JSON.stringify({
-          query: `
-            mutation {
-              seedDatabase
-            }
-          `,
-          variables: null,
-        }),
-      })
-      .catch(() => {})
-      .then(() => {
-        this.setState({ postingSeedDatabase: false });
-      });
+    this.setState({ selectedTags: values })
   }
 
-
-
-  handleSubmit = (e) => {
+  handleSubmit = (e, addWord) => {
     e.preventDefault();
     this.props.form.validateFields((err, values) => {
       if (!err) {
-        this.addWord(
-          values.japaneseWord,
-          values.englishWord,
-          this.state.selectedTags.map(a => parseInt(a))
-        );
+        const data = new FormData(e.target);
+
+        debugger;
+
+        addWord({
+          variables: {
+            englishWord: data.get('englishWord'),
+            japaneseWord: data.get('japaneseWord'),
+            tags: (data.get('tags') || []).map(a => parseInt(a)),
+          },
+        });
       }
     });
   }
@@ -163,8 +125,8 @@ class WordInputForm extends React.Component {
     const { postingWord, postingClearWordList, postingSeedDatabase, postingTag, wordListJSON } = this.state;
 
     // Only show error after a field is touched.
-    const userNameError = isFieldTouched('userName') && getFieldError('userName');
-    const passwordError = isFieldTouched('password') && getFieldError('password');
+    const japaneseWordError = isFieldTouched('japaneseWord') && getFieldError('japaneseWord');
+    const englishWordError = isFieldTouched('englishWord') && getFieldError('englishWord');
     const tagError = isFieldTouched('tagError') && getFieldError('tagError');
 
     return (
@@ -173,58 +135,64 @@ class WordInputForm extends React.Component {
         {/* Input New Words */}
         <div>
           <h1 style={{ fontSize: 50 }}>Input New Word</h1>
-          <Form layout="inline" onSubmit={this.handleSubmit}>
-            <Form.Item
-              validateStatus={userNameError ? 'error' : ''}
-              help={userNameError || ''}
-            >
-              {getFieldDecorator('japaneseWord', {
-                rules: [{ required: true, message: 'Please input a Japanese Word' }],
-              })(
-                <Input placeholder="Japanese" />
-              )}
-            </Form.Item>
-            <Form.Item
-              validateStatus={passwordError ? 'error' : ''}
-              help={passwordError || ''}
-            >
-              {getFieldDecorator('englishWord', {
-                rules: [{ required: true, message: 'Please input an English Word' }],
-              })(
-                <Input placeholder="English" />
-              )}
-            </Form.Item>
-            <Form.Item>
-              <Query query={TAGS}>
-                  {({ data }) => {
-                    return (
-                      <Select
-                        mode='multiple'
-                        placeholder="Please select tags that match these words"
-                        style={{ minWidth: '200px' }}
-                        onChange={(selectedTags) => { this.setState({ selectedTags })}}
-                      >
-                        { (data.tagList || []).map(tagItem => 
-                          <Option key={tagItem.id}>{tagItem.tagName}</Option>
-                        )}                   
-                      </Select>
-                    );
-                  }}
-              </Query>
-            </Form.Item>
-            <div>
-              <Form.Item>
-                <Button
-                  type="primary"
-                  htmlType="submit"
-                  disabled={postingWord || hasErrors(getFieldsError())}
+          <Mutation mutation={SEED_DATABASE}> 
+            { (addWord) => (
+              <Form layout="inline" onSubmit={e => this.handleSubmit(e, addWord)}>
+                <Form.Item
+                  validateStatus={japaneseWordError ? 'error' : ''}
+                  help={japaneseWordError || ''}
                 >
-                  { postingWord ? 'Posting...' : 'Post New Word' }
-                </Button>
-              </Form.Item>
-            </div>
-          </Form>
+                  {getFieldDecorator('japaneseWord', {
+                    rules: [{ required: true, message: 'Please input a Japanese Word' }],
+                  })(
+                    <Input name="japaneseWord" placeholder="Japanese" />
+                  )}
+                </Form.Item>
+                <Form.Item
+                  validateStatus={englishWordError ? 'error' : ''}
+                  help={englishWordError || ''}
+                >
+                  {getFieldDecorator('englishWord', {
+                    rules: [{ required: true, message: 'Please input an English Word' }],
+                  })(
+                    <Input name="englishWord" placeholder="English" />
+                  )}
+                </Form.Item>
+                <Form.Item>
+                  <Query query={TAGS}>
+                      {({ data }) => (
+                        <Select
+                          mode='multiple'
+                          name='tags'
+                          placeholder="Please select tags that match these words"
+                          style={{ minWidth: '200px' }}
+                          onChange={this.handleTagChange}
+                        >
+                          { (data.tagList || []).map(tagItem => 
+                            <Option key={tagItem.id}>{tagItem.tagName}</Option>
+                          )}                   
+                        </Select>
+                      )}
+                  </Query>
+                </Form.Item>
+                <div>
+                  <Form.Item>
+                    <Button
+                      type="primary"
+                      htmlType="submit"
+                      disabled={postingWord || hasErrors(getFieldsError())}
+                    >
+                      { postingWord ? 'Posting...' : 'Post New Word' }
+                    </Button>
+                  </Form.Item>
+                </div>
+              </Form>
+              )
+            }
+          </Mutation>
         </div>
+
+
 
         {/* Input New Words */}
         <div>
@@ -236,12 +204,20 @@ class WordInputForm extends React.Component {
         { /* Button Actions */ }
         <div style={{ marginTop: 20 }}>
           <h1 style={{ fontSize: 50 }}>Options</h1>
-          <Button type="primary" onClick={() => this.clearWordList()}>
-            { postingClearWordList ? 'Deleting...' : 'Delete Word List' }
-          </Button>
-          <Button style={{marginLeft: 20}} type="primary" onClick={() => this.seedDatabase()}>
-            { postingSeedDatabase ? 'Seeding...' : 'Seed Database' }
-          </Button>
+          <Mutation mutation={SEED_DATABASE}>
+            {(seedDatabase, { loading }) => (
+              <Button disabled={loading} type="primary" onClick={seedDatabase}>
+                { loading ? 'Seeding...' : 'Seed Database' }
+              </Button>
+            )}
+          </Mutation>
+          <Mutation mutation={CLEAR_WORDLIST}>
+            {(clearWordList, { loading }) => (
+                <Button disabled={loading} style={{ marginLeft: '20px' }} type="primary" onClick={clearWordList}>
+                { loading ? 'Deleting...' : 'Delete Word List' }
+              </Button>
+            )}
+          </Mutation>
         </div>
 
         <div style={{ marginTop: 20 }}>

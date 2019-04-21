@@ -18,5 +18,8 @@
     "serverless-offline": "^4.9.4",
     "serverless-websockets-plugin": "^1.0.0",
     "wscat": "^2.2.1"
+  },
+  "scripts": {
+    "deploy-prod": "./node_modules/.bin/sls deploy --stage prod --region us-east-1"
   }
 }

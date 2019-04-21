@@ -1,0 +1,4 @@
+config:
+  SECRET_ARN: arn:aws:secretsmanager:us-east-1:145722906259:secret:rds-db-credentials/cluster-4TIKWP44SE7WNX4LI3MTN3WBZU/MasterUsername-FbqxVQ
+  DB_ARN: arn:aws:rds:us-east-1:145722906259:cluster:nihongo-service-prod-rdscluster-joac280dpm5p
+  DATABASE_NAME: RANDOMNAME

@@ -11,12 +11,12 @@ function hasErrors(fieldsError) {
 }
 
 const TAGS = gql`
-    query {
-        tagList {
-            id
-            tagName
-        }
+  query {
+    tagList {
+        id
+        tagName
     }
+  }
 `;
 
 const SEED_DATABASE = gql`
@@ -36,81 +36,35 @@ const WRITE_WORD = gql`
     writeWord(englishWord: $englishWord, japaneseWord: $japaneseWord, tags: $tags)
 }`;
 
-class WordInputForm extends React.Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      postingWord: false,
-      postingClearWordList: false,
-      postingSeedDatabase: false,
-      postingTag: false,
-      wordListJSON: null,
-    };
+const WORDLIST = gql`
+  query {
+    wordListJSON
   }
+`;
 
+const CREATE_TAG = gql`
+  mutation ($tagName: String!) {
+    createTag(tagName: $tagName)
+  }
+`;
+
+class WordInputForm extends React.Component {
   componentDidMount() {
     // To disabled submit button at the beginning.
     this.props.form.validateFields();
-    this.getWordListJSON();
   }
 
-  addTag(tagName) {
-    this.setState({ postingTag: true });
-
-    return fetch('http://localhost:3000/graphql', {
-        method: 'POST',
-        body: JSON.stringify({
-          query: `
-            mutation ($tagName: String!) {
-              createTag(tagName: $tagName)
-            }
-          `,
-          variables: { tagName },
-        }),
-      })
-      .catch(() => {})
-      .then(() => {
-        this.setState({ postingTag: false });
-      });
-  }
-
-  getWordListJSON() {
-    fetch('http://localhost:3000/graphql', {
-        method: 'POST',
-        body: JSON.stringify({
-          query: `
-            query {
-              wordListJSON
-            }
-          `,
-          variables: null,
-        }),
-      })
-      .then(wordList => wordList.json())
-      .then(result => this.setState({ wordListJSON: result.data.wordListJSON }))
-      .catch(() => {});
-  }
-
-  handleTagChange(values) {
-    debugger;
-
-    this.setState({ selectedTags: values })
-  }
-
-  handleSubmit = (e, addWord) => {
+  handleSubmit = (e, addWord, selectedTags) => {
     e.preventDefault();
     this.props.form.validateFields((err, values) => {
       if (!err) {
         const data = new FormData(e.target);
 
-        debugger;
-
         addWord({
           variables: {
             englishWord: data.get('englishWord'),
             japaneseWord: data.get('japaneseWord'),
-            tags: (data.get('tags') || []).map(a => parseInt(a)),
+            tags: (selectedTags || []).map(a => parseInt(a)),
           },
         });
       }
@@ -121,8 +75,6 @@ class WordInputForm extends React.Component {
     const {
       getFieldDecorator, getFieldsError, getFieldError, isFieldTouched,
     } = this.props.form;
-
-    const { postingWord, postingClearWordList, postingSeedDatabase, postingTag, wordListJSON } = this.state;
 
     // Only show error after a field is touched.
     const japaneseWordError = isFieldTouched('japaneseWord') && getFieldError('japaneseWord');
@@ -135,9 +87,9 @@ class WordInputForm extends React.Component {
         {/* Input New Words */}
         <div>
           <h1 style={{ fontSize: 50 }}>Input New Word</h1>
-          <Mutation mutation={SEED_DATABASE}> 
-            { (addWord) => (
-              <Form layout="inline" onSubmit={e => this.handleSubmit(e, addWord)}>
+          <Mutation mutation={WRITE_WORD}> 
+            { (addWord, { loading }) => (
+              <Form layout="inline" onSubmit={e => this.handleSubmit(e, addWord, this.state.selectedTags)}>
                 <Form.Item
                   validateStatus={japaneseWordError ? 'error' : ''}
                   help={japaneseWordError || ''}
@@ -166,7 +118,7 @@ class WordInputForm extends React.Component {
                           name='tags'
                           placeholder="Please select tags that match these words"
                           style={{ minWidth: '200px' }}
-                          onChange={this.handleTagChange}
+                          onChange={selectedTags => this.setState({ selectedTags: selectedTags })}
                         >
                           { (data.tagList || []).map(tagItem => 
                             <Option key={tagItem.id}>{tagItem.tagName}</Option>
@@ -180,9 +132,9 @@ class WordInputForm extends React.Component {
                     <Button
                       type="primary"
                       htmlType="submit"
-                      disabled={postingWord || hasErrors(getFieldsError())}
+                      disabled={loading || hasErrors(getFieldsError())}
                     >
-                      { postingWord ? 'Posting...' : 'Post New Word' }
+                      { loading ? 'Posting...' : 'Post New Word' }
                     </Button>
                   </Form.Item>
                 </div>
@@ -192,13 +144,19 @@ class WordInputForm extends React.Component {
           </Mutation>
         </div>
 
-
-
         {/* Input New Words */}
         <div>
-          <h1 style={{ fontSize: 50 }}>Input New Tag</h1>
-          <Input placeholder="New Tag" onChange={e => this.setState({ tagName: e.target.value}) } />
-          <Button type="primary" onClick={() => this.addTag(this.state.tagName)}>Create Tag</Button>
+          <h1 style={{ fontSize: 50 }}>Create Tag</h1>
+          <Mutation mutation={CREATE_TAG}>
+            {(createTag, { loading }) => (
+              <>
+                <Input placeholder="New Tag" onChange={e => this.setState({ tagName: e.target.value}) } />
+                <Button disabled={loading} type="primary" onClick={() => createTag({ variables: { tagName: this.state.tagName } })}>
+                  { loading ? 'Creating Tag...' : 'Create Tag' }
+                </Button>
+              </>
+            )}
+          </Mutation>
         </div>
 
         { /* Button Actions */ }
@@ -221,10 +179,13 @@ class WordInputForm extends React.Component {
         </div>
 
         <div style={{ marginTop: 20 }}>
-          <pre>{ wordListJSON }</pre>
-        </div>        
+          <Query query={WORDLIST}>
+            {({ data }) => (
+              <pre>{ data.wordListJSON }</pre>
+            )}
+          </Query>
+        </div>
       </div>
-
     );
   }
 }

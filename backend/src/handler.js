@@ -87,7 +87,11 @@ const server = new ApolloServer({
 const handler = (event, context, callback) => {
     console.log(JSON.stringify({ event, context }));
 
-    const handler = server.createHandler();
+    const handler = server.createHandler({
+        cors: {
+            origin: '*'
+        },
+    });
 
     handler(event, context, callback);
 };

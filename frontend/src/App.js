@@ -10,6 +10,7 @@ import { client } from './services/apollo-client';
 import { WordInput } from './pages/word-input';
 import { Home } from './pages/home';
 import { Topics } from './pages/topics';
+import { Seed } from './pages/seed';
 
 function BasicExample() {
   const { SubMenu } = Menu;
@@ -38,6 +39,9 @@ function BasicExample() {
               <Menu.Item key="3">
                 <Link to="/topics">Topics</Link>
               </Menu.Item>            
+              <Menu.Item key="4">
+                <Link to="/seed">seed</Link>
+              </Menu.Item>                      
             </Menu>
           </Header>
           <Content style={{ padding: '0 50px' }}>
@@ -73,11 +77,12 @@ function BasicExample() {
                   <Route exact path="/" component={Home} />
                   <Route path="/word-input" component={WordInput} />
                   <Route path="/topics" component={Topics} />
+                  <Route path="/seed" component={Seed} />
               </Content>
             </Layout>
           </Content>
           <Footer style={{ textAlign: 'center' }}>
-            Ant Design ©2018 Created by Ant UED
+            Nihongo 
           </Footer>
         </Layout>
       </Router>

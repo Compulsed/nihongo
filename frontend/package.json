@@ -17,7 +17,9 @@
   },
   "scripts": {
     "start": "REACT_APP_API_URL=http://localhost:3000/graphql react-scripts start",
-    "build": "REACT_APP_API_URL=http://localhost:3000/graphql react-scripts build",
+    "start-remote": "REACT_APP_API_URL=https://rpxxdi5vs6.execute-api.us-east-1.amazonaws.com/dev/graphql react-scripts start",
+    "start-remote-production": "REACT_APP_API_URL=https://c1ync6mwnj.execute-api.us-east-1.amazonaws.com/prod/graphql react-scripts start",
+    "build": "REACT_APP_API_URL=https://c1ync6mwnj.execute-api.us-east-1.amazonaws.com/prod/graphql react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

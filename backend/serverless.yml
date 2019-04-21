@@ -11,14 +11,13 @@ provider:
     - Effect: Allow
       Action: "*"
       Resource: "*"
-  environment:
-    API_REGION: "${self:provider.region}"
-    SECRET_ARN: ${env:SECRET_ARN}
-    DB_ARN: ${env:DB_ARN}
-    DATABASE_NAME: ${env:DATABASE_NAME}
+  environment: ${file(./config/${opt:stage}.yml):config}
 
 plugins:
   - serverless-offline
+
+custom:
+  config: ${file(./config/${opt:stage}.yml):config}
 
 functions:
   graphql:
@@ -44,4 +43,4 @@ resources:
           AutoPause: true
           MaxCapacity: 16
           MinCapacity: 2
-          SecondsUntilAutoPause: 300
+          SecondsUntilAutoPause: 3600

@@ -22,6 +22,7 @@
   "scripts": {
     "start": "./node_modules/.bin/sls offline --stage dev --region us-east-1",
     "deploy-prod": "npm install && ./node_modules/.bin/sls deploy --stage prod --region us-east-1",
-    "deploy-test": "npm install && ./node_modules/.bin/sls deploy --stage test --region us-east-1"
+    "deploy-test": "npm install && ./node_modules/.bin/sls deploy --stage test --region us-east-1",
+    "deploy-dev": "npm install && ./node_modules/.bin/sls deploy --stage dev --region us-east-1"
   }
 }

@@ -7,7 +7,6 @@ const sql = sqlMessager();
 
 const knex = require('knex')({client: 'mysql'})
 
-// TODO: Note SQL Injection
 const wordList = async (args) => {
     queryString = knex('japaneseToEnglishWords')
         .innerJoin('japaneseToEnglishWords_tags', 'japaneseToEnglishWords.id', 'japaneseToEnglishWords_tags.japaneseToEnglishWordsId')
@@ -26,7 +25,6 @@ const wordList = async (args) => {
         .map(row => Object.assign({}, row, { japaneseWord: decodeURI(row.japaneseWord) }));
 };
 
-// TODO: Note SQL Injection
 const writeWord = async (args) => {
     const englishWord = args.englishWord;
     const japaneseWord = encodeURI(args.japaneseWord);

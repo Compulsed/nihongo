@@ -16,8 +16,8 @@
     "sqlstring": "^2.3.1"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
+    "start": "REACT_APP_API_URL=http://localhost:3000/graphql react-scripts start",
+    "build": "REACT_APP_API_URL=http://localhost:3000/graphql react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

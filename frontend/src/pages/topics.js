@@ -5,6 +5,9 @@ export function Topics({ match }) {
     return (
         <div>
             <h2>Topics</h2>
+            <div>
+                <pre>{ JSON.stringify(process.env, null, 2) }</pre>
+            </div>            
             <ul>
                 <li>
                     <Link to={`${match.url}/rendering`}>Rendering with React</Link>

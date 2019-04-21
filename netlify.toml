@@ -18,14 +18,6 @@ ID = "f4e31586-63e8-4880-86e5-15f88cb5f2f2"
   # Default build command.
   command = "npm run build"
 
-[[redirects]]
-  from = "/graphql"
-  to = "https://c1ync6mwnj.execute-api.us-east-1.amazonaws.com/prod/graphql"
-  status = 200
-  force = true
-  [redirects.headers]
-    X-Api-Key = "some-api-key-string"
-
 
 [[redirects]]
   from = "/*"

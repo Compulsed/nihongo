@@ -32,5 +32,5 @@ echo "Running serverless deployment"
 APOLLO_ENGINE_API_KEY=$(configure --stage "$STAGE" --key "APOLLO_ENGINE_KEY")
 GRAPHQL_ENDPOINT=$(configure --stage "$STAGE" --key "GRAPHQL_URL")
 
-echo "Pushing schema to apollo engine for stage: ${$STAGE}"
+echo "Pushing schema to apollo engine for stage: $STAGE"
 ./node_modules/.bin/apollo service:push --tag="$STAGE" --key="$APOLLO_ENGINE_API_KEY" --endpoint="$GRAPHQL_ENDPOINT"

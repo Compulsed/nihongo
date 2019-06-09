@@ -22,4 +22,8 @@ if [ -z "$STAGE" ]; then
   echo "$usage"; exit 1;
 fi
 
+echo "Checking required configuration is present"
+configure --stage "$STAGE" --ci true
+
+echo "Running serverless deployment"
 ./node_modules/.bin/sls deploy --stage "$STAGE" --region us-east-1 --verbose

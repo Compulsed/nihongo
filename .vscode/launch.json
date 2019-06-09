@@ -7,10 +7,9 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Run configure against dev stage",
-            "program": "${workspaceFolder}/bin/configure",
-            "args": ["--stage", "dev"],
-            "cwd": "${workspaceFolder}",
+            "name": "Debug Configure",
+            "program": "${workspaceFolder}/backend/bin/configure",
+            "args": ["--stage", "dev"]
         }
     ]
 }

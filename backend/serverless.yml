@@ -11,13 +11,13 @@ provider:
     - Effect: Allow
       Action: "*"
       Resource: "*"
-  environment: ${file(./config/${opt:stage}.yml):config}
+  environment:
+    SECRET_ARN: ${ssm:/${self:provider.stage}-${self:service}-SECRET_ARN~true}
+    DB_ARN: ${ssm:/${self:provider.stage}-${self:service}-DB_ARN~true}
+    DATABASE_NAME: ${ssm:/${self:provider.stage}-${self:service}-DATABASE_NAME~true}
 
 plugins:
   - serverless-offline
-
-custom:
-  config: ${file(./config/${opt:stage}.yml):config}
 
 functions:
   graphql:
@@ -36,7 +36,7 @@ resources:
       Properties:
         MasterUsername: MasterUsername
         MasterUserPassword: MasterUserPassword
-        DatabaseName: RANDOMNAME
+        DatabaseName: ${ssm:/${self:provider.stage}-${self:service}-DATABASE_NAME~true}
         Engine: aurora
         EngineMode: serverless
         ScalingConfiguration:

@@ -1,0 +1,103 @@
+#!/usr/bin/env node
+const argv = require('minimist')(process.argv.slice(2));
+const AWS = require('aws-sdk');
+const ssm = new AWS.SSM();
+const yaml = require('js-yaml');
+const fs   = require('fs');
+const inquirer = require('inquirer');
+const get = require('lodash/get');
+
+const populateExistingValuesFromSSM = async (configurations) => {
+    const getConfiguration = async (configuration) => {
+        const ssmConfig = await  ssm.getParameter({
+            Name: configuration.path, 
+            WithDecryption: true
+        })
+        .promise()
+        .catch(err => {
+            return err.code === 'ParameterNotFound'
+                ? null
+                : Promise.reject(err);
+        });
+
+        return { ...configuration, value: get(ssmConfig, 'Parameter.Value') || null };
+    }
+
+    return Promise.all(configurations.map(getConfiguration));
+}
+
+const requestValuesFromUser = async (configurations) => {
+    const result = await inquirer
+        .prompt(configurations.map(config => ({
+            message: `(Path: ${config.path + (config.value ? (', CurrentValue: ' + config.value) : '') })`,
+            name: config.path,
+            default: config.value,
+        })));
+
+    return configurations.map(configuration => ({
+        ...configuration,
+        value: result[configuration.path] || null,
+    }));
+};
+
+const pushValuesToSSM = async (configurations) => {
+    const pushConfiguration = (configuration) => {
+        return ssm.putParameter({
+            Name: configuration.path,
+            Type: 'SecureString',
+            Value: configuration.value,
+            Overwrite: true,
+        })
+        .promise();
+    }
+
+    return Promise.all(configurations.map(pushConfiguration));
+};
+
+const filterNonPresentConfigurationValues = (configurations) => {
+    return configurations.filter(configuration => !configuration.value);
+}
+
+const printMissingConfigurationMessage = (configurations) => {
+    const missingValues = configurations.map(configuration => configuration.path)
+
+    console.error(`Missing: ${JSON.stringify(missingValues)} values`);
+}
+
+const init = async () => {
+    const usage = () => {
+        console.info('Usage: configure --stage <stage> --ci <true/false>')
+    }
+
+    if (!argv.stage) {
+        usage()
+
+        process.exit(1);
+    }
+
+    const stage = argv.stage;
+    const service = yaml.safeLoad(fs.readFileSync('./serverless.yml', 'utf8')).service.name;
+
+    const configurations = require('../required-config.json')
+        .map(key => ({ key, value: null, path: `${stage}-${service}-${key}` }));
+    
+    const populatedValues = await populateExistingValuesFromSSM(configurations);
+
+    if (argv.ci) {
+        const filteredNonPresentConfigurationValues = filterNonPresentConfigurationValues(populatedValues);
+
+        if (filteredNonPresentConfigurationValues.length === 0) {
+            process.exit(0);
+        }
+        
+        printMissingConfigurationMessage(filteredNonPresentConfigurationValues);
+
+        process.exit(1);
+    }
+
+    await Promise.resolve(populatedValues)
+        .then(requestValuesFromUser)
+        .then(pushValuesToSSM);
+}
+
+init();

@@ -3,7 +3,7 @@ service:
 
 provider:
   name: aws
-  runtime: nodejs8.10
+  runtime: nodejs10.x
   stackName: ${self:service}-${self:provider.stage}
   stage: ${opt:stage, 'dev'}
   region: ${opt:region, 'us-east-1'}

@@ -3,34 +3,36 @@ set -euo pipefail
 
 STAGE="dev"
 
-usage="USAGE: $(basename "$0") [-s|--stage] <stage>
-where:
-    -s | --stage        stage for deployment (required)
-    -h | --help         show this help text"
+# usage="USAGE: $(basename "$0") [-s|--stage] <stage>
+# where:
+#     -s | --stage        stage for deployment (required)
+#     -h | --help         show this help text"
 
-while [ $# -gt 0 ]; do
-    if [[ $1 =~ "--"* ]]; then
-        case $1 in
-            --help|-h) echo "$usage"; exit; ;;
-            --stage|-s) STAGE=$2;;
-        esac
-    fi
-    shift
-done
+# while [ $# -gt 0 ]; do
+#     if [[ $1 =~ "--"* ]]; then
+#         case $1 in
+#             --help|-h) echo "$usage"; exit; ;;
+#             --stage|-s) STAGE=$2;;
+#         esac
+#     fi
+#     shift
+# done
 
-if [ -z "$STAGE" ]; then
-  echo "$usage"; exit 1;
-fi
+# if [ -z "$STAGE" ]; then
+#   echo "$usage"; exit 1;
+# fi
 
-echo "Checking required configuration is present"
-configure --stage "$STAGE" --ci true
+# echo "Checking required configuration is present"
+# configure --stage "$STAGE" --ci true
 
-echo "Running serverless deployment"
-./node_modules/.bin/sls deploy --stage "$STAGE" --region us-east-1 --verbose
+# echo "Running serverless deployment"
+# ./node_modules/.bin/sls deploy --stage "$STAGE" --region us-east-1 --verbose
 
 # Apollo Engine
 APOLLO_ENGINE_API_KEY=$(configure --stage "$STAGE" --key "APOLLO_ENGINE_KEY")
 GRAPHQL_ENDPOINT=$(configure --stage "$STAGE" --key "GRAPHQL_URL")
+
+echo "$APOLLO_ENGINE_API_KEY : $GRAPHQL_ENDPOINT"
 
 echo "Pushing schema to apollo engine for stage: $STAGE"
 ./node_modules/.bin/apollo service:push --tag="$STAGE" --key="$APOLLO_ENGINE_API_KEY" --endpoint="$GRAPHQL_ENDPOINT"

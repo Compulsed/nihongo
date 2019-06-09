@@ -66,7 +66,7 @@ const printMissingConfigurationMessage = (configurations) => {
 
 const init = async () => {
     const usage = () => {
-        console.info('Usage: configure --stage <stage> --ci <true/false>')
+        console.info('Usage: configure --stage <stage> --ci <true/false> --key <value>')
     }
 
     if (!argv.stage) {
@@ -93,6 +93,12 @@ const init = async () => {
         printMissingConfigurationMessage(filteredNonPresentConfigurationValues);
 
         process.exit(1);
+    }
+
+    // Print out value to be used within the shell or caller eg. val=$(configure --key DATABASE_NAME)
+    if (argv.key) {
+        console.log(get(populatedValues.find(value => value.key === argv.key), 'value') || null);
+        process.exit(0);
     }
 
     await Promise.resolve(populatedValues)

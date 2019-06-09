@@ -10,7 +10,6 @@
     "graphql": "^14.2.1",
     "knex": "^0.16.5",
     "lodash": "^4.17.11",
-    "mysql2": "^1.6.5",
     "sqlstring": "^2.3.1"
   },
   "devDependencies": {

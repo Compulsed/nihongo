@@ -23,14 +23,14 @@ if [ -z "$STAGE" ]; then
 fi
 
 echo "Checking required configuration is present"
-configure --stage "$STAGE" --ci true
+./configure --stage "$STAGE" --ci true
 
 echo "Running serverless deployment"
 ./node_modules/.bin/sls deploy --stage "$STAGE" --region us-east-1 --verbose
 
 # Apollo Engine
-APOLLO_ENGINE_API_KEY=$(configure --stage "$STAGE" --key "APOLLO_ENGINE_KEY")
-GRAPHQL_ENDPOINT=$(configure --stage "$STAGE" --key "GRAPHQL_URL")
+APOLLO_ENGINE_API_KEY=$(./configure --stage "$STAGE" --key "APOLLO_ENGINE_KEY")
+GRAPHQL_ENDPOINT=$(./configure --stage "$STAGE" --key "GRAPHQL_URL")
 
 echo "Pushing schema to apollo engine for stage: $STAGE"
 ./node_modules/.bin/apollo service:push --tag="$STAGE" --key="$APOLLO_ENGINE_API_KEY" --endpoint="$GRAPHQL_ENDPOINT"

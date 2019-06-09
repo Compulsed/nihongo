@@ -82,6 +82,9 @@ const resolvers = {
 const server = new ApolloServer({
     typeDefs,
     resolvers,
+    engine: {
+        apiKey: process.env.APOLLO_ENGINE_KEY,
+    }
 });
 
 const handler = (event, context, callback) => {

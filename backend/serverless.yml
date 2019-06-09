@@ -15,6 +15,7 @@ provider:
     SECRET_ARN: ${ssm:/${self:provider.stage}-${self:service}-SECRET_ARN~true}
     DB_ARN: ${ssm:/${self:provider.stage}-${self:service}-DB_ARN~true}
     DATABASE_NAME: ${ssm:/${self:provider.stage}-${self:service}-DATABASE_NAME~true}
+    APOLLO_ENGINE_KEY: ${ssm:/${self:provider.stage}-${self:service}-APOLLO_ENGINE_KEY~true}
 
 plugins:
   - serverless-offline

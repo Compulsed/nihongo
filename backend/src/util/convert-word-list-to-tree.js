@@ -1,4 +1,19 @@
-const convertToTreeForm = (japaneseWordArray) => {
+const wordIterator = (format, word, cb) => {
+  switch (format) {
+    case 'NORMAL': {
+      for(let i = 0; i < word.length; ++i) {
+        cb(word[i]);
+      }
+    }
+    case 'REVERSE': {
+      for(let i = word.length - 1; i > 0; --i) {
+        cb(word[i]);
+      }
+    }
+  }
+}
+
+const convertToTreeForm = (japaneseWordArray, { format }) => {
     const dict = {
       name: 'root',
       children: {},
@@ -7,9 +22,7 @@ const convertToTreeForm = (japaneseWordArray) => {
     japaneseWordArray.forEach(({ japaneseWord, englishWord }) => {
       let currentNode = dict;
       
-      for(let i = 0; i < japaneseWord.length; ++i) {
-        const char = japaneseWord[i];
-        
+      wordIterator(format, japaneseWord, char => {
         if (!currentNode.children[char]) {
           currentNode.children[char] = {
             name: char,
@@ -18,8 +31,9 @@ const convertToTreeForm = (japaneseWordArray) => {
         }
   
         currentNode = currentNode.children[char];
-      }
-  
+
+      });
+
       currentNode.children[englishWord] = {
         name: `(${japaneseWord}, ${englishWord})`,
         children: {},

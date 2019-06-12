@@ -19,6 +19,11 @@ custom:
     graphQL:
       path: /graphql
 
+package:
+  exclude:
+    - src/**
+    - node_modules/**
+
 plugins:
   - serverless-offline
 
@@ -41,9 +46,18 @@ functions:
           
 resources:
   Resources:
+    RDSSECRET:
+      Type: "AWS::SecretsManager::Secret"
+      Properties:
+        Description: "This is a Secrets Manager secret for an RDS DB instance"
+        GenerateSecretString:
+          SecretStringTemplate: '{"username": "admin"}'
+          GenerateStringKey: "password"
+          PasswordLength: 16
+          ExcludeCharacters: '"@/\'
+
     RDSCluster:
       Type: AWS::RDS::DBCluster
-      DeletionPolicy: Delete # TODO: Change to retain in the future
       Properties:
         MasterUsername:
           Fn::Join: ['', ['{{resolve:secretsmanager:', { "Ref": "RDSSECRET" }, ':SecretString:username}}' ]]
@@ -58,21 +72,10 @@ resources:
           MinCapacity: 2
           SecondsUntilAutoPause: 3600
 
-    RDSSECRET:
-      Type: "AWS::SecretsManager::Secret"
-      Properties:
-        Description: "This is a Secrets Manager secret for an RDS DB instance"
-        GenerateSecretString:
-          SecretStringTemplate: '{"username": "admin"}'
-          GenerateStringKey: "password"
-          PasswordLength: 16
-          ExcludeCharacters: '"@/\'
-
     #This is a SecretTargetAttachment resource which updates the referenced Secret resource with properties about
     #the referenced RDS instance
     RDSSecretInstanceAttachment:
       Type: "AWS::SecretsManager::SecretTargetAttachment"
-      DependsOn: RDSCluster
       Properties:
         SecretId:
           Ref: RDSSECRET

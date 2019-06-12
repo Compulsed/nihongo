@@ -11,11 +11,13 @@ provider:
     - Effect: Allow
       Action: "*"
       Resource: "*"
-  environment:
-    SECRET_ARN: ${ssm:/${self:provider.stage}-${self:service}-SECRET_ARN~true}
-    DB_ARN: ${ssm:/${self:provider.stage}-${self:service}-DB_ARN~true}
-    DATABASE_NAME: ${ssm:/${self:provider.stage}-${self:service}-DATABASE_NAME~true}
-    APOLLO_ENGINE_KEY: ${ssm:/${self:provider.stage}-${self:service}-APOLLO_ENGINE_KEY~true}
+
+custom:
+  RDS:
+    name: RANDOMNAME
+  APIGateway:
+    graphQL:
+      path: /graphql
 
 plugins:
   - serverless-offline
@@ -29,15 +31,25 @@ functions:
           path: graphql
           method: post
           cors: true
+    environment:
+      SECRET_ARN:
+        Ref: RDSSECRET
+      DB_ARN:
+        Ref: RDSCluster
+      DATABASE_NAME: ${self:custom.RDS.name}
+      APOLLO_ENGINE_KEY: ${ssm:/${self:provider.stage}-${self:service}-APOLLO_ENGINE_KEY~true}
           
 resources:
   Resources:
     RDSCluster:
       Type: AWS::RDS::DBCluster
+      DeletionPolicy: Delete # TODO: Change to retain in the future
       Properties:
-        MasterUsername: MasterUsername
-        MasterUserPassword: MasterUserPassword
-        DatabaseName: ${ssm:/${self:provider.stage}-${self:service}-DATABASE_NAME~true}
+        MasterUsername:
+          Fn::Join: ['', ['{{resolve:secretsmanager:', { "Ref": "RDSSECRET" }, ':SecretString:username}}' ]]
+        MasterUserPassword:
+          Fn::Join: ['', ['{{resolve:secretsmanager:', { "Ref": "RDSSECRET" }, ':SecretString:password}}' ]]
+        DatabaseName: ${self:custom.RDS.name}
         Engine: aurora
         EngineMode: serverless
         ScalingConfiguration:
@@ -45,3 +57,25 @@ resources:
           MaxCapacity: 16
           MinCapacity: 2
           SecondsUntilAutoPause: 3600
+
+    RDSSECRET:
+      Type: "AWS::SecretsManager::Secret"
+      Properties:
+        Description: "This is a Secrets Manager secret for an RDS DB instance"
+        GenerateSecretString:
+          SecretStringTemplate: '{"username": "admin"}'
+          GenerateStringKey: "password"
+          PasswordLength: 16
+          ExcludeCharacters: '"@/\'
+
+    #This is a SecretTargetAttachment resource which updates the referenced Secret resource with properties about
+    #the referenced RDS instance
+    RDSSecretInstanceAttachment:
+      Type: "AWS::SecretsManager::SecretTargetAttachment"
+      DependsOn: RDSCluster
+      Properties:
+        SecretId:
+          Ref: RDSSECRET
+        TargetId:
+          Ref: RDSCluster
+        TargetType: AWS::RDS::DBInstance

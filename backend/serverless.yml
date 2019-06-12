@@ -13,8 +13,10 @@ provider:
       Resource: "*"
 
 custom:
+  accountId: #{AWS::AccountId}
   RDS:
-    name: RANDOMNAME
+    name: nihongodb
+    clusterIdentifier: ${self:service}-${self:provider.stage}-nihongo-aurora-cluster
   APIGateway:
     graphQL:
       path: /graphql
@@ -38,32 +40,30 @@ functions:
           cors: true
     environment:
       SECRET_ARN:
-        Ref: RDSSECRET
-      DB_ARN:
-        Ref: RDSCluster
+        Ref: DatabaseSecret
+      DB_ARN: arn:aws:rds:${self:provider.region}:#{AWS::AccountId}:cluster:${self:custom.RDS.clusterIdentifier}
       DATABASE_NAME: ${self:custom.RDS.name}
       APOLLO_ENGINE_KEY: ${ssm:/${self:provider.stage}-${self:service}-APOLLO_ENGINE_KEY~true}
           
 resources:
   Resources:
-    RDSSECRET:
-      Type: "AWS::SecretsManager::Secret"
+    DatabaseSecret:
+      Type: AWS::SecretsManager::Secret
       Properties:
-        Description: "This is a Secrets Manager secret for an RDS DB instance"
+        Description: 'This is the secret for my RDS instance'
         GenerateSecretString:
           SecretStringTemplate: '{"username": "admin"}'
-          GenerateStringKey: "password"
+          GenerateStringKey: 'password'
           PasswordLength: 16
-          ExcludeCharacters: '"@/\'
+          ExcludeCharacters: '"@/'
 
-    RDSCluster:
+    DBClusterCluster:
       Type: AWS::RDS::DBCluster
       Properties:
-        MasterUsername:
-          Fn::Join: ['', ['{{resolve:secretsmanager:', { "Ref": "RDSSECRET" }, ':SecretString:username}}' ]]
-        MasterUserPassword:
-          Fn::Join: ['', ['{{resolve:secretsmanager:', { "Ref": "RDSSECRET" }, ':SecretString:password}}' ]]
+        MasterUsername: !Join ['', ['{{resolve:secretsmanager:', !Ref DatabaseSecret, ':SecretString:username}}' ]]
+        MasterUserPassword: !Join ['', ['{{resolve:secretsmanager:', !Ref DatabaseSecret, ':SecretString:password}}' ]]
         DatabaseName: ${self:custom.RDS.name}
+        DBClusterIdentifier: ${self:custom.RDS.clusterIdentifier}
         Engine: aurora
         EngineMode: serverless
         ScalingConfiguration:
@@ -72,13 +72,9 @@ resources:
           MinCapacity: 2
           SecondsUntilAutoPause: 3600
 
-    #This is a SecretTargetAttachment resource which updates the referenced Secret resource with properties about
-    #the referenced RDS instance
-    RDSSecretInstanceAttachment:
-      Type: "AWS::SecretsManager::SecretTargetAttachment"
+    SecretRDSInstanceAttachment:
+      Type: AWS::SecretsManager::SecretTargetAttachment
       Properties:
-        SecretId:
-          Ref: RDSSECRET
-        TargetId:
-          Ref: RDSCluster
-        TargetType: AWS::RDS::DBInstance
+        SecretId: !Ref DatabaseSecret
+        TargetId: !Ref DatabaseInstance
+        TargetType: AWS::RDS::DBCluster

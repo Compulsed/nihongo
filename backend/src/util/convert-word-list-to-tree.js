@@ -1,19 +1,54 @@
 const wordIterator = (format, word, cb) => {
+  const normal = () => {
+    for(let i = 0; i < word.length; ++i) {
+      cb(word[i]);
+    }
+  }
+
+  const reverse = () => {
+    for(let i = word.length - 1; i >= 0; --i) {
+      cb(word[i]);
+    }
+  }
+
   switch (format) {
     case 'NORMAL': {
-      for(let i = 0; i < word.length; ++i) {
-        cb(word[i]);
-      }
+      return normal();
     }
     case 'REVERSE': {
-      for(let i = word.length - 1; i > 0; --i) {
-        cb(word[i]);
-      }
+      return reverse();
     }
+    default:
+      return normal();
   }
 }
 
-const convertToTreeForm = (japaneseWordArray, { format }) => {
+const mergeNodes = (format, node) => {
+  if (node.edge || node.children.length === 0) {
+    return node;
+  }
+
+  if (node.name !== 'root' && node.children.length === 1 && !node.children[0].edge) {
+    if (format === 'NORMAL') {
+      node.name = node.name + node.children[0].name;
+    }
+    
+    if (format === 'REVERSE') {
+      node.name = node.children[0].name + node.name;
+    }
+
+    node.children = node.children[0].children;
+  }
+
+  node.children = node.children.map(node => mergeNodes(format, node));
+
+  return node;
+}
+
+const convertToTreeForm = ({ japaneseWordArray, format, compressed }) => {
+    format = format || 'NORMAL';
+    compressed = compressed || true;
+
     const dict = {
       name: 'root',
       children: {},
@@ -31,12 +66,12 @@ const convertToTreeForm = (japaneseWordArray, { format }) => {
         }
   
         currentNode = currentNode.children[char];
-
       });
 
       currentNode.children[englishWord] = {
         name: `(${japaneseWord}, ${englishWord})`,
         children: {},
+        edge: true,
       }
     });
   
@@ -46,8 +81,10 @@ const convertToTreeForm = (japaneseWordArray, { format }) => {
         .sort()
         .map(recursiveArray) }
     );
-  
-    return recursiveArray(dict);
+
+    return compressed
+      ? mergeNodes(format, recursiveArray(dict))
+      : recursiveArray(dict)
 };
 
 module.exports = {

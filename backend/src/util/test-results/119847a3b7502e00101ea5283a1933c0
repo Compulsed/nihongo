@@ -1,0 +1,45 @@
+{
+  "name": "root",
+  "children": [
+    {
+      "name": "これ",
+      "children": [
+        {
+          "name": "(これ, That)",
+          "children": [],
+          "edge": true
+        }
+      ]
+    },
+    {
+      "name": "それ",
+      "children": [
+        {
+          "name": "(それ, That)",
+          "children": [],
+          "edge": true
+        },
+        {
+          "name": "それ",
+          "children": [
+            {
+              "name": "(それそれ, ThatThat)",
+              "children": [],
+              "edge": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "だれ",
+      "children": [
+        {
+          "name": "(だれ, Who)",
+          "children": [],
+          "edge": true
+        }
+      ]
+    }
+  ]
+}

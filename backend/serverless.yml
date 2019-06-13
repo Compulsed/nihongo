@@ -108,3 +108,9 @@ resources:
           - ${self:custom.GraphQL.path}
       Export:
         Name: ${self:service}-${self:provider.stage}-GraphQLUrl
+
+    DatabaseClusterIdentifier:
+      Value:
+        { Ref: DatabaseCluster }
+      Export:
+        Name: ${self:service}-${self:provider.stage}-DatabaseClusterIdentifier

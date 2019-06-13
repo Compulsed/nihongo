@@ -27,11 +27,22 @@ echo "Checking required configuration is present"
 ./bin/configure --stage "$STAGE" --ci true
 
 echo "Running serverless deployment"
-# ./node_modules/.bin/sls deploy --stage "$STAGE" --region us-east-1 --verbose
+./node_modules/.bin/sls deploy --stage "$STAGE" --region us-east-1 --verbose --aws-s3-accelerate
 
-# Apollo Engine
-APOLLO_ENGINE_API_KEY=$(./bin/configure --stage "$STAGE" --key "APOLLO_ENGINE_KEY")
+# TODO: Remove once DataAPI can be added in cloudformation
+echo "Enabling Data API on RDS"
+DATABASE_CLUSTER_ID=$(aws cloudformation describe-stacks --stack-name "$STACK_NAME" --query "Stacks[0].Outputs[?OutputKey=='DatabaseClusterIdentifier'].OutputValue" --output text)
+aws rds modify-db-cluster --db-cluster-identifier "$DATABASE_CLUSTER_ID" --enable-http-endpoint >/dev/null
+
+# GraphQL
 GRAPHQL_ENDPOINT=$(aws cloudformation describe-stacks --stack-name "$STACK_NAME" --query "Stacks[0].Outputs[?OutputKey=='GraphQLUrl'].OutputValue" --output text)
 
+echo "Seeding databbase"
+curl --request POST \
+  --url "$GRAPHQL_ENDPOINT" \
+  --header 'content-type: application/json' \
+  --data '{"query":"mutation {\n  seedDatabase\n}"}'
+
 echo "Pushing schema to apollo engine for stage: $STAGE"
+APOLLO_ENGINE_API_KEY=$(./bin/configure --stage "$STAGE" --key "APOLLO_ENGINE_KEY")
 ./node_modules/.bin/apollo service:push --tag="$STAGE" --key="$APOLLO_ENGINE_API_KEY" --endpoint="$GRAPHQL_ENDPOINT"

@@ -1,5 +1,3 @@
-use RANDOMNAME;
-
 -- japaneseToEnglishWords
 DROP TABLE IF EXISTS japaneseToEnglishWords_tags;
 DROP TABLE IF EXISTS japaneseToEnglishWords;

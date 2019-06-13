@@ -1,8 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-STAGE="dev"
-STACK_NAME="nihongo-service-$STAGE" # TODO: Get from serverless.yml
+
 
 usage="USAGE: $(basename "$0") [-s|--stage] <stage>
 where:
@@ -22,6 +21,8 @@ done
 if [ -z "$STAGE" ]; then
   echo "$usage"; exit 1;
 fi
+
+STACK_NAME="nihongo-service-$STAGE" # TODO: Get from serverless.yml
 
 echo "Checking required configuration is present"
 ./bin/configure --stage "$STAGE" --ci true

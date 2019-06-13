@@ -12,14 +12,21 @@ provider:
       Action: "*"
       Resource: "*"
 
+  apiGateway:
+    restApiId: 
+      Ref: ApiGatewayRestApi
+    restApiResources:
+      Fn::GetAtt:
+        - ApiGatewayRestApi
+        - RootResourceId
+
 custom:
   accountId: #{AWS::AccountId}
   RDS:
     name: nihongodb
     clusterIdentifier: ${self:service}-${self:provider.stage}-nihongo-aurora-cluster
-  APIGateway:
-    graphQL:
-      path: /graphql
+  GraphQL:
+    path: '/graphql'
 
 package:
   exclude:
@@ -28,6 +35,7 @@ package:
 
 plugins:
   - serverless-offline
+  - serverless-pseudo-parameters
 
 functions:
   graphql:
@@ -35,18 +43,22 @@ functions:
     timeout: 30
     events:
       - http:
-          path: graphql
+          path: ${self:custom.GraphQL.path}
           method: post
           cors: true
     environment:
-      SECRET_ARN:
-        Ref: DatabaseSecret
+      SECRET_ARN: { Ref: DatabaseSecret }
       DB_ARN: arn:aws:rds:${self:provider.region}:#{AWS::AccountId}:cluster:${self:custom.RDS.clusterIdentifier}
       DATABASE_NAME: ${self:custom.RDS.name}
       APOLLO_ENGINE_KEY: ${ssm:/${self:provider.stage}-${self:service}-APOLLO_ENGINE_KEY~true}
           
 resources:
   Resources:
+    ApiGatewayRestApi:
+      Type: AWS::ApiGateway::RestApi
+      Properties:
+        Name: ${self:service}-${self:provider.stage}
+
     DatabaseSecret:
       Type: AWS::SecretsManager::Secret
       Properties:
@@ -57,7 +69,7 @@ resources:
           PasswordLength: 16
           ExcludeCharacters: '"@/'
 
-    DBClusterCluster:
+    DatabaseCluster:
       Type: AWS::RDS::DBCluster
       Properties:
         MasterUsername: !Join ['', ['{{resolve:secretsmanager:', !Ref DatabaseSecret, ':SecretString:username}}' ]]
@@ -76,5 +88,21 @@ resources:
       Type: AWS::SecretsManager::SecretTargetAttachment
       Properties:
         SecretId: !Ref DatabaseSecret
-        TargetId: !Ref DatabaseInstance
+        TargetId: !Ref DatabaseCluster
         TargetType: AWS::RDS::DBCluster
+
+  Outputs:
+    GraphQLUrl:
+      Value:
+        Fn::Join:
+        - ""
+        - - "https://"
+          - Ref: "ApiGatewayRestApi"
+          - ".execute-api."
+          - ${self:provider.region}.
+          - Ref: "AWS::URLSuffix"
+          - "/"
+          - ${self:provider.stage}
+          - ${self:custom.GraphQL.path}
+      Export:
+        Name: ${self:service}-${self:provider.stage}-GraphQLUrl

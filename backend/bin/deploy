@@ -33,4 +33,5 @@ APOLLO_ENGINE_API_KEY=$(./bin/configure --stage "$STAGE" --key "APOLLO_ENGINE_KE
 GRAPHQL_ENDPOINT=$(./bin/configure --stage "$STAGE" --key "GRAPHQL_URL")
 
 echo "Pushing schema to apollo engine for stage: $STAGE"
+# --query "Stacks[0].Outputs[?OutputKey=='DbUrl'].OutputValue" --output text # For GrapbQL End point access
 ./node_modules/.bin/apollo service:push --tag="$STAGE" --key="$APOLLO_ENGINE_API_KEY" --endpoint="$GRAPHQL_ENDPOINT"

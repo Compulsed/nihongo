@@ -28,10 +28,10 @@ custom:
   GraphQL:
     path: '/graphql'
 
-package:
-  exclude:
-    - src/**
-    - node_modules/**
+# package:
+#   exclude:
+#     - src/**
+#     - node_modules/**
 
 plugins:
   - serverless-offline
@@ -72,8 +72,10 @@ resources:
     DatabaseCluster:
       Type: AWS::RDS::DBCluster
       Properties:
-        MasterUsername: !Join ['', ['{{resolve:secretsmanager:', !Ref DatabaseSecret, ':SecretString:username}}' ]]
-        MasterUserPassword: !Join ['', ['{{resolve:secretsmanager:', !Ref DatabaseSecret, ':SecretString:password}}' ]]
+        MasterUsername:
+          Fn::Join: ['', ['{{resolve:secretsmanager:', { Ref: DatabaseSecret }, ':SecretString:username}}' ]]
+        MasterUserPassword:
+          Fn::Join: ['', ['{{resolve:secretsmanager:', { Ref: DatabaseSecret }, ':SecretString:password}}' ]]
         DatabaseName: ${self:custom.RDS.name}
         DBClusterIdentifier: ${self:custom.RDS.clusterIdentifier}
         Engine: aurora
@@ -87,8 +89,8 @@ resources:
     SecretRDSInstanceAttachment:
       Type: AWS::SecretsManager::SecretTargetAttachment
       Properties:
-        SecretId: !Ref DatabaseSecret
-        TargetId: !Ref DatabaseCluster
+        SecretId: { Ref: DatabaseSecret }
+        TargetId: { Ref: DatabaseCluster }
         TargetType: AWS::RDS::DBCluster
 
   Outputs:

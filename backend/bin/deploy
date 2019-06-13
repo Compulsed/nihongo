@@ -27,7 +27,7 @@ echo "Checking required configuration is present"
 ./bin/configure --stage "$STAGE" --ci true
 
 echo "Running serverless deployment"
-./node_modules/.bin/sls deploy --stage "$STAGE" --region us-east-1 --verbose
+# ./node_modules/.bin/sls deploy --stage "$STAGE" --region us-east-1 --verbose
 
 # Apollo Engine
 APOLLO_ENGINE_API_KEY=$(./bin/configure --stage "$STAGE" --key "APOLLO_ENGINE_KEY")

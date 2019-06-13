@@ -27,7 +27,7 @@ echo "Checking required configuration is present"
 ./bin/configure --stage "$STAGE" --ci true
 
 echo "Running serverless deployment"
-# ./node_modules/.bin/sls deploy --stage "$STAGE" --region us-east-1 --verbose --aws-s3-accelerate
+./node_modules/.bin/sls deploy --stage "$STAGE" --region us-east-1 --verbose --aws-s3-accelerate
 
 # TODO: Remove once DataAPI can be added in cloudformation
 echo "Enabling Data API on RDS"
